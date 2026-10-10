@@ -4,6 +4,10 @@ Segmentation Manager is a web application for managing VRFs and BGP route-target
 
 [Source code](https://github.com/l0crian1/Segmentation-Manager) · [Releases](https://github.com/l0crian1/Segmentation-Manager/releases) · [Docker Hub](https://hub.docker.com/r/l0crian/segman)
 
+<img width="1263" height="992" alt="image" src="https://github.com/user-attachments/assets/1c22a4b1-d776-4119-96dc-67ff2bf34551" />
+<img width="1266" height="1139" alt="image" src="https://github.com/user-attachments/assets/1deaee4d-b4cf-4ee4-86f3-2ca81d3f90a8" />
+
+
 ## Features
 
 - Organize routers into sites and manage their API connections and certificate trust.
