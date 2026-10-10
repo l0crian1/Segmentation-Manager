@@ -1,0 +1,5 @@
+services:
+  segmentation-manager:
+    image: segman:local
+    build: .
+    pull_policy: never

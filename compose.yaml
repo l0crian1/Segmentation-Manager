@@ -1,0 +1,15 @@
+services:
+  segmentation-manager:
+    image: l0crian/segman:${SEGMAN_TAG:-latest}
+    ports:
+      - "${SEGMAN_BIND_ADDRESS:-127.0.0.1}:${SEGMAN_PORT:-8443}:8443"
+    volumes:
+      - microseg-data:/data
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+volumes:
+  microseg-data: # Stable volume key retained for existing installations.

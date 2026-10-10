@@ -1,0 +1,14 @@
+node_modules/
+web/dist/
+data/
+*.db*
+*.key
+*.pem
+coverage.out
+playwright-report/
+test-results/
+.env
+.env.*
+/segmentation-manager
+.local-access.json
+*.tsbuildinfo

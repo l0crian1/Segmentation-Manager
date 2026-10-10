@@ -1,0 +1,349 @@
+/* Semantic colors are shared by the matrix, forms, dialogs and status surfaces. */
+:root {
+  color-scheme: light;
+  --page: #f3f6f8;
+  --surface: #ffffff;
+  --surface-muted: #edf2f5;
+  --ink: #203543;
+  --muted: #526878;
+  --line: #cbd5dd;
+  --teal: #126d60;
+  --accent-fill: #126d60;
+  --on-accent: #ffffff;
+  --success-bg: #e2f3eb;
+  --success-text: #176044;
+  --success-line: #83b99e;
+  --warning-bg: #fff2d5;
+  --warning-text: #795413;
+  --warning-line: #cfad64;
+  --error-bg: #ffebe8;
+  --error-text: #963f34;
+  --error-line: #dba299;
+  --tile-off: #e2e9ef;
+  --tile-border: #7b8d9c;
+  --tile-on: #147451;
+  --tile-check: #ffffff;
+  --focus: #077dba;
+  --mpls-bg: #e1efff;
+  --mpls-text: #19538b;
+  --vxlan-bg: #f0e6ff;
+  --vxlan-text: #6b3295;
+  color: var(--ink);
+  background: var(--page);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #101820;
+  --surface: #1a2631;
+  --surface-muted: #22323f;
+  --ink: #e4edf4;
+  --muted: #adbfce;
+  --line: #435a6c;
+  --teal: #7ed5bd;
+  --accent-fill: #307e69;
+  --success-bg: #173d31;
+  --success-text: #a5e4c5;
+  --success-line: #467d61;
+  --warning-bg: #3e321c;
+  --warning-text: #f3ce80;
+  --warning-line: #a1823f;
+  --error-bg: #432923;
+  --error-text: #ffb6aa;
+  --error-line: #986156;
+  --tile-off: #2b3e4c;
+  --tile-border: #829cad;
+  --tile-on: #5ad5a3;
+  --tile-check: #082b21;
+  --focus: #70c9fa;
+  --mpls-bg: #203c59;
+  --mpls-text: #aed5ff;
+  --vxlan-bg: #3c2b50;
+  --vxlan-text: #dfbcff;
+}
+.badge.mpls {
+  background: var(--mpls-bg);
+  color: var(--mpls-text);
+}
+.badge.vxlan {
+  background: var(--vxlan-bg);
+  color: var(--vxlan-text);
+}
+body {
+  background: var(--page);
+  color: var(--ink);
+}
+input,
+select,
+textarea,
+.secondary,
+.topbar,
+.device-bar,
+.matrix-panel,
+.matrix th,
+.disclosure,
+.modal,
+.site-card,
+.table-wrap,
+.settings-panel,
+.access {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+p,
+small,
+.field,
+.breadcrumb,
+.breadcrumb strong,
+.local-badge,
+.stats span,
+.stats small,
+.matrix-tools p,
+.matrix th small,
+.matrix .corner,
+.matrix-legend,
+.matrix-footnote,
+.matrix-footnote svg,
+.device-name,
+.device-name small,
+.tabs button,
+.secure-note,
+.steps,
+footer,
+footer a,
+.search,
+input::placeholder,
+.corner svg {
+  color: var(--muted);
+}
+.stats strong,
+.matrix th,
+.matrix tbody th {
+  color: var(--ink);
+}
+.search,
+.data-table th,
+.trust-panel,
+.review-target,
+.badge {
+  background: var(--surface-muted);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.matrix-tools,
+.matrix th,
+.matrix td,
+.matrix-legend,
+.data-table td,
+.stats > div,
+.modal,
+.secondary,
+input,
+select,
+textarea {
+  border-color: var(--line);
+}
+.matrix tr:hover td,
+.matrix td:hover {
+  background: var(--surface-muted) !important;
+}
+.primary,
+.apply-bar .primary {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+.badge.green,
+.alert.success,
+.empty-icon,
+.section-icon,
+.site-icon,
+.avatar.light {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border-color: var(--success-line);
+}
+.badge.amber,
+.alert.warning {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border-color: var(--warning-line);
+}
+.alert.error {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border-color: var(--error-line);
+}
+.danger {
+  color: var(--error-text);
+}
+.warning-text,
+.read-only,
+.disclosure summary {
+  color: var(--warning-text) !important;
+}
+.cell,
+.cell.off,
+.matrix-legend i {
+  background: var(--tile-off);
+  border: 1px solid var(--tile-border);
+  color: var(--ink);
+}
+.cell.on,
+.matrix-legend i.legend-on {
+  background: var(--tile-on);
+  border-color: var(--tile-on);
+  color: var(--tile-check);
+}
+.cell.partial,
+.matrix-legend i.legend-partial {
+  background: var(--warning-bg);
+  border-color: var(--warning-line);
+  color: var(--warning-text);
+}
+.cell.unknown {
+  background: var(--surface-muted);
+  color: var(--muted);
+  border: 1px dashed var(--tile-border);
+  opacity: 1;
+}
+.cell:disabled:not(.unknown) {
+  opacity: 0.85;
+}
+.cell.pending {
+  outline-color: var(--focus);
+}
+.cell.off.pending {
+  color: var(--ink);
+}
+button:focus-visible,
+a:focus-visible {
+  outline-color: var(--focus);
+}
+.theme-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.theme-selector select {
+  width: auto;
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.access-theme {
+  position: absolute;
+  right: 24px;
+  top: 18px;
+}
+.brand {
+  font-size: 17px;
+  letter-spacing: -0.4px;
+  align-items: flex-start;
+}
+.brand > span {
+  max-width: 135px;
+  line-height: 1.3;
+}
+.brand-mark {
+  flex-shrink: 0;
+}
+.brand small {
+  font-size: 7px;
+  margin-top: 6px;
+}
+.sidebar .scope-note,
+.sidebar .nav-label,
+.sidebar .nav-item small,
+.sidebar .profile small {
+  color: #9fb5c4;
+}
+.access-story p {
+  color: #adbfce;
+}
+@media (max-width: 760px) {
+  .sidebar .brand {
+    font-size: 17px;
+  }
+  .brand > span {
+    max-width: 210px;
+  }
+  .local-badge {
+    display: none;
+  }
+  .access-theme {
+    top: 90px;
+    right: 24px;
+  }
+  .access-form {
+    padding-top: 65px;
+  }
+}
+
+.device-bar select {
+  background: var(--surface);
+  color: var(--ink);
+}
+.device-icon {
+  background: var(--surface-muted);
+  color: var(--muted);
+}
+
+/* VRF management uses the same semantic palette in both themes. */
+.vrf-form {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.vrf-section {
+  border-top: 1px solid var(--line);
+  margin-top: 22px;
+  padding-top: 16px;
+}
+.vrf-section h3 {
+  margin: 0 0 14px;
+}
+.vrf-family {
+  margin: 18px 0;
+}
+.vrf-family .form-grid {
+  margin-top: 12px;
+}
+.vrf-muted,
+.vrf-detail {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.vrf-detail {
+  display: block;
+}
+.vrf-badges,
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.vrf-section .command-preview {
+  max-height: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.permission-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}

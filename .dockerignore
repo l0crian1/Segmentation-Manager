@@ -1,0 +1,14 @@
+.git
+web/node_modules
+web/dist
+data
+*.db*
+*.key
+*.pem
+test-results
+playwright-report
+.local-access.json
+.env
+.env.*
+*.tar
+*.tar.gz

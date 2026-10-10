@@ -1,0 +1,87 @@
+name: Publish container
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dockerhub-publish
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - name: Validate release version
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          tag = os.environ['RELEASE_TAG']
+          number = r'(?:0|[1-9][0-9]*)'
+          identifier = rf'(?:{number}|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)'
+          match = re.fullmatch(rf'v({number})\.({number})\.({number})(-({identifier})(\.{identifier})*)?', tag)
+          if not match or len(tag) > 128:
+              raise SystemExit('Use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-PRERELEASE, without build metadata.')
+          prerelease = match.group(4) is not None
+          if prerelease != (os.environ['PRERELEASE'] == 'true'):
+              raise SystemExit('The version suffix and GitHub pre-release setting must agree.')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              print(f'stable={str(not prerelease).lower()}', file=output)
+              print(f'major_alias={str(not prerelease and match.group(1) != "0").lower()}', file=output)
+          PY
+
+      - name: Image tags and labels
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: l0crian/segman
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ steps.version.outputs.stable }}
+            type=semver,pattern={{major}},enable=${{ steps.version.outputs.major_alias }}
+            type=raw,value=latest,enable=${{ steps.version.outputs.stable }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Sign in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and publish
+        id: image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=segman-release
+          cache-to: type=gha,mode=max,scope=segman-release
+          provenance: mode=max
+          sbom: true
+      - name: Record published digest
+        env:
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+        run: echo "Published l0crian/segman@$IMAGE_DIGEST" >> "$GITHUB_STEP_SUMMARY"
