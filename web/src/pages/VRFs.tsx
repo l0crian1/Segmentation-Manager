@@ -369,12 +369,6 @@ export default function VRFs({
           continues if you leave the page.
         </div>
       )}
-      {data && !data.writable && (
-        <div className="alert warning">
-          Read-only inventory. VRF changes require VyOS 1.5 or a tested rolling
-          build.
-        </div>
-      )}
       {!device ? (
         <Blank title="Choose a managed router">
           Add a router in Devices to discover its VRFs.

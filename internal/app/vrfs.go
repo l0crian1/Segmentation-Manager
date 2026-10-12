@@ -68,9 +68,6 @@ type VRFPlan struct {
 	Expected M         `json:"-"`
 }
 
-func vrfWritable(v string) bool {
-	return strings.Contains(v, "VyOS 1.5.") || strings.Contains(v, "2026.09.17-0028-rolling")
-}
 func (r *Router) vrfInventory(ctx context.Context, d Device) (VRFInventory, error) {
 	v, e := r.version(ctx)
 	if e != nil {
@@ -83,7 +80,8 @@ func (r *Router) vrfInventory(ctx context.Context, d Device) (VRFInventory, erro
 	return inventoryFromConfig(raw, v, d), nil
 }
 func inventoryFromConfig(raw M, version string, d Device) VRFInventory {
-	s := VRFInventory{DeviceID: d.ID, Version: version, Writable: vrfWritable(version), Raw: raw, VRFs: []ManagedVRF{}, RouteMaps: []string{}, GlobalASN: str(at(raw, "protocols", "bgp", "system-as"))}
+	// Keep writable in the API for existing clients; release names do not gate edits.
+	s := VRFInventory{DeviceID: d.ID, Version: version, Writable: true, Raw: raw, VRFs: []ManagedVRF{}, RouteMaps: []string{}, GlobalASN: str(at(raw, "protocols", "bgp", "system-as"))}
 	for name := range object(at(raw, "policy", "route-map")) {
 		s.RouteMaps = append(s.RouteMaps, name)
 	}
@@ -109,7 +107,7 @@ func inventoryFromConfig(raw M, version string, d Device) VRFInventory {
 			}
 		}
 		ev := object(af["l2vpn-evpn"])
-		row.EVPN = EVPNSettings{Enabled: present(cfg, "vni") || present(af, "l2vpn-evpn"), VNI: str(cfg["vni"]), RD: str(ev["route-distinguisher"]), Exports: union(targets(at(ev, "route-target", "export")), targets(at(ev, "route-target", "both"))), Imports: union(targets(at(ev, "route-target", "import")), targets(at(ev, "route-target", "both"))), IPv4: at(ev, "advertise", "ipv4", "unicast") != nil, IPv6: at(ev, "advertise", "ipv6", "unicast") != nil}
+		row.EVPN = EVPNSettings{Enabled: present(cfg, "vni") || present(af, "l2vpn-evpn"), VNI: str(cfg["vni"]), RD: str(ev["rd"]), Exports: union(targets(at(ev, "route-target", "export")), targets(at(ev, "route-target", "both"))), Imports: union(targets(at(ev, "route-target", "import")), targets(at(ev, "route-target", "both"))), IPv4: at(ev, "advertise", "ipv4", "unicast") != nil, IPv6: at(ev, "advertise", "ipv6", "unicast") != nil}
 		row.Dependencies = vrfDependencies(raw, name)
 		s.VRFs = append(s.VRFs, row)
 	}
@@ -189,9 +187,6 @@ func validateExports(rt []string) error {
 func buildVRFPlan(s VRFInventory, b VRFIntent, save bool) (VRFPlan, error) {
 	p := VRFPlan{Commands: []Command{}, Warnings: []string{}, Save: save, Expected: cloneConfig(s.Raw)}
 	bad := func(msg string) (VRFPlan, error) { return p, errors.New(msg) }
-	if !s.Writable {
-		return bad("VRF management requires VyOS 1.5 or a tested rolling build")
-	}
 	v := b.VRF
 	base := []string{"vrf", "name", v.Name}
 	old := object(at(s.Raw, base...))
@@ -387,7 +382,7 @@ func buildVRFPlan(s VRFInventory, b VRFIntent, save bool) (VRFPlan, error) {
 				}
 			}
 			set(v.EVPN.VNI, bp("vni")...)
-			leaf(v.EVPN.RD, ep("route-distinguisher")...)
+			leaf(v.EVPN.RD, ep("rd")...)
 			oldTargets := targets(at(old, "protocols", "bgp", "address-family", "l2vpn-evpn", "route-target", "export"))
 			newTargets := union(v.EVPN.Exports, nil)
 			// EVPN targets are multi-valued; replace only the export leaf, never imports.
@@ -419,7 +414,7 @@ func buildVRFPlan(s VRFInventory, b VRFIntent, save bool) (VRFPlan, error) {
 			}
 			del(bp("vni")...)
 			del(ep("route-target")...)
-			del(ep("route-distinguisher")...)
+			del(ep("rd")...)
 			del(ep("advertise", "ipv4", "unicast")...)
 			del(ep("advertise", "ipv6", "unicast")...)
 			p.Warnings = append(p.Warnings, "EVPN import/export targets and advertisements will be removed. Other BGP settings are retained.")

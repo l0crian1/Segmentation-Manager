@@ -239,9 +239,6 @@ func (r *Router) version(ctx context.Context) (string, error) {
 	}
 	return "Unknown", nil
 }
-func recognized(v string) bool {
-	return strings.Contains(v, "VyOS 1.4.") || strings.Contains(v, "VyOS 1.5.") || strings.Contains(v, "2026.09.17-0028-rolling")
-}
 func (r *Router) snapshot(ctx context.Context, d Device, mode, family string) (Snapshot, error) {
 	s := Snapshot{DeviceID: d.ID, Mode: mode, Family: family, At: time.Now().UTC().Format(time.RFC3339), VRFs: []VRF{}, Warnings: []string{}}
 	if mode != "mpls" && mode != "evpn" {
@@ -307,9 +304,6 @@ func (r *Router) snapshot(ctx context.Context, d Device, mode, family string) (S
 		}
 		if present(object(afi["import"]), "vrf") {
 			reason = "VRF shortcut imports are outside route-target management"
-		}
-		if !recognized(v) {
-			reason = "This VyOS build has not been recognized for writes"
 		}
 		for _, t := range union(imports, exports) {
 			if !validRT(t) {

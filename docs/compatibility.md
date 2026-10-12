@@ -4,11 +4,13 @@
 
 ## VyOS compatibility
 
-- **VyOS 1.4.x:** supported MPLS and EVPN matrix configuration changes; VRF inventory is available, but VRF creation, editing, and deletion are read-only.
-- **VyOS 1.5.x:** supported matrix changes and VRF creation, editing, and deletion.
-- **Rolling:** write access is enabled for `2026.09.17-0028-rolling`. Other rolling versions remain read-only until validated and recognized by the application.
+All VyOS release versions, including LTS, rolling, development, and custom builds, can use VRF creation, editing, deletion, and the MPLS/EVPN matrices. The reported version is informational; there is no version allow-list or version-based read-only mode.
 
-Automated configuration coverage includes 1.4 and 1.5 layouts. Live router validation currently covers the listed rolling build; compatibility with every 1.4/1.5 maintenance release is not implied. Validate changes against your intended router release before production use.
+The router must expose the HTTPS API and accept the generated configuration paths. Configuration validation, account permissions, dependency checks, stale-state detection, and read-back verification still apply. Allowing a release does not imply that every feature has been tested on that release.
+
+Live configuration tests on **VyOS 1.4.4 and 1.5.1** cover plain and combined MPLS/EVPN VRF creation, editing and deletion; IPv4/IPv6 MPLS and EVPN pair and same-VRF imports; preservation of imports during VRF edits; all four VPN route-map assignments; and IPv4/IPv6 per-nexthop label allocation. Temporary test resources were removed and each router's full baseline configuration was verified restored without saving. These are configuration tests, not end-to-end forwarding tests.
+
+Earlier live validation also covered `2026.09.17-0028-rolling`. Automated regression tests ensure arbitrary LTS, rolling, custom, future, and unknown version strings cannot disable VRF or matrix editing.
 
 Hosting the application through VyOS native containers is documented for 1.5. This hosting requirement is separate from the versions it can manage remotely. Published images target Linux AMD64 and ARM64.
 
@@ -54,7 +56,7 @@ Confirm that the API is enabled, the saved port and key are correct, and the API
 
 ### A VRF is read-only or missing from a matrix
 
-Read its attention message. Check the router version, selected MPLS address family, and whether the VRF has suitable explicit export RTs. EVPN requires explicit exports even if FRR is generating automatic targets. Use the VRFs page to inspect its actual configuration, then refresh after correcting it.
+Read its attention message. Check the selected MPLS address family and whether the VRF has suitable explicit export RTs. EVPN requires explicit exports even if FRR is generating automatic targets. Use the VRFs page to inspect its actual configuration, then refresh after correcting it. The router's release version does not make a VRF read-only.
 
 ### “Router configuration changed while you were editing”
 

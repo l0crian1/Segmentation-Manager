@@ -24,7 +24,7 @@ Segmentation Manager configures VRFs and their route-target policies on existing
 
 - A Docker host running Linux containers, or a VyOS 1.5 router with native container support.
 - Persistent storage mounted at `/data` and management-network access to the application and router HTTPS APIs.
-- VyOS 1.4.x or 1.5.x for supported matrix changes; VRF creation, editing, and deletion require 1.5.x. Selected rolling builds are also supported. See [compatibility and limits](docs/compatibility.md) for the exact scope.
+- A VyOS router with the HTTPS API enabled. All release versions can use VRF management and the connectivity matrices; there is no version allow-list. See [compatibility and limits](docs/compatibility.md) for tested releases and configuration requirements.
 
 ## Get started
 

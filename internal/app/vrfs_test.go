@@ -19,6 +19,40 @@ func newVRFIntent() VRFIntent {
 }
 func managementInventory(raw M) VRFInventory { return inventoryFromConfig(raw, "VyOS 1.5.0", Device{}) }
 
+func TestEVPNRouteDistinguisherPath(t *testing.T) {
+	b := newVRFIntent()
+	b.VRF.EVPN.RD = "65000:3901"
+	p, err := buildVRFPlan(managementInventory(M{}), b, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := []string{"vrf", "name", "TEST", "protocols", "bgp", "address-family", "l2vpn-evpn", "rd"}
+	if at(p.Expected, path...) != b.VRF.EVPN.RD {
+		t.Fatal("EVPN must use the VyOS rd leaf")
+	}
+	for _, rd := range []string{"65000:3902", ""} {
+		s := managementInventory(p.Expected)
+		if s.VRFs[0].EVPN.RD != b.VRF.EVPN.RD {
+			t.Fatal("inventory lost configured RD")
+		}
+		b = VRFIntent{Action: "update", VRF: s.VRFs[0]}
+		b.VRF.EVPN.RD = rd
+		p, err = buildVRFPlan(s, b, false)
+		if err != nil || len(p.Commands) != 1 {
+			t.Fatal("RD edit changed unrelated settings", err, p.Commands)
+		}
+		want := path
+		op := "delete"
+		if rd != "" {
+			want = append(append([]string{}, path...), rd)
+			op = "set"
+		}
+		if p.Commands[0].Op != op || !reflect.DeepEqual(p.Commands[0].Path, want) {
+			t.Fatal("incorrect EVPN RD command", p.Commands)
+		}
+	}
+}
+
 func TestPerNexthopLabelAllocation(t *testing.T) {
 	for _, family := range []string{"ipv4-unicast", "ipv6-unicast"} {
 		t.Run(family, func(t *testing.T) {
@@ -211,11 +245,6 @@ func TestVRFValidation(t *testing.T) {
 	b.VRF.Table = "4000"
 	if _, e := buildVRFPlan(s, b, false); e == nil {
 		t.Fatal("changed existing table")
-	}
-	s.Version = "VyOS 1.4.0"
-	s.Writable = false
-	if _, e := buildVRFPlan(s, newVRFIntent(), false); e == nil {
-		t.Fatal("unsupported write")
 	}
 }
 func TestVRFVerificationDetectsDriftAndMissingFlags(t *testing.T) {

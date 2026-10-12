@@ -265,14 +265,14 @@ func TestBackupRestoresAccountsAndSecrets(t *testing.T) {
 func routerFixture() M {
 	return M{"name": M{"A": M{"table": "101", "protocols": M{"bgp": M{"address-family": M{"ipv4-unicast": M{"import": M{"vpn": M{}}, "export": M{"vpn": M{}}, "route-target": M{"vpn": M{"export": "65000:1"}}}}}}}, "B": M{"table": "102", "protocols": M{"bgp": M{"address-family": M{"ipv4-unicast": M{"import": M{"vpn": M{}}, "export": M{"vpn": M{}}, "route-target": M{"vpn": M{"export": "65000:2"}}}}}}}}}
 }
-func TestDiscoveryLTSAndRollingFixtures(t *testing.T) {
-	for _, version := range []string{"VyOS 1.4.3", "VyOS 1.5.0", "VyOS 2026.09.17-0028-rolling"} {
+func TestDiscoveryAllowsEveryRelease(t *testing.T) {
+	for _, version := range releaseFixtures {
 		t.Run(version, func(t *testing.T) {
 			server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				r.ParseForm()
 				var q M
 				json.Unmarshal([]byte(r.Form.Get("data")), &q)
-				data := any(routerFixture())
+				data := any(releaseVRFFixture())
 				if r.URL.Path == "/show" {
 					data = "Version:          " + version + "\n"
 				}
@@ -280,13 +280,17 @@ func TestDiscoveryLTSAndRollingFixtures(t *testing.T) {
 			}))
 			defer server.Close()
 			router := &Router{client: server.Client(), base: server.URL, key: "key"}
-			s, e := router.snapshot(context.Background(), Device{}, "mpls", "ipv4-unicast")
-			if e != nil || len(s.VRFs) != 2 || s.VRFs[0].Reason != "" {
-				t.Fatalf("%v %+v", e, s)
-			}
-			p, e := buildPlan(s, []Edit{{"A", "B", true}}, false)
-			if e != nil || len(p.Commands) != 2 {
-				t.Fatal(e)
+			for _, mode := range []string{"mpls", "evpn"} {
+				for _, family := range []string{"ipv4-unicast", "ipv6-unicast"} {
+					s, e := router.snapshot(context.Background(), Device{}, mode, family)
+					if e != nil || len(s.VRFs) != 2 || s.VRFs[0].Reason != "" || s.VRFs[1].Reason != "" {
+						t.Fatalf("%s %s: %v %+v", mode, family, e, s)
+					}
+					p, e := buildPlan(s, []Edit{{"A", "B", true}}, false)
+					if e != nil || len(p.Commands) != 2 {
+						t.Fatal(mode, family, e)
+					}
+				}
 			}
 		})
 	}
